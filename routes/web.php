@@ -1,9 +1,10 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Application;
+use App\Http\Controllers\BoardController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -22,6 +23,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/boards', [BoardController::class, 'index'])->name('boards.index');
+    Route::get('/boards/create', [BoardController::class, 'create'])->name('boards.create');
+    Route::post('/boards', [BoardController::class, 'store'])->name('boards.store');
+    Route::delete('/boards/{board}', [BoardController::class, 'destroy'])->name('boards.destroy');
 });
 
 require __DIR__.'/auth.php';
