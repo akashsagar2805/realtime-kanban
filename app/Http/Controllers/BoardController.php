@@ -49,4 +49,38 @@ class BoardController extends Controller
 
         return redirect()->route('boards.index')->with('success', 'Board deleted successfully.');
     }
+
+    public function show(Board $board)
+    {
+        $this->authorize('view', $board);
+
+        $board->load('columns.cards');
+
+        return Inertia::render('Boards/Show', [
+            'board' => $board
+        ]);
+    }
+
+    public function edit(Board $board)
+    {
+        $this->authorize('update', $board);
+
+        return Inertia::render('Boards/Edit', [
+            'board' => $board,
+        ]);
+    }
+
+    public function update(Request $request, Board $board)
+    {
+        $this->authorize('update', $board);
+
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $board->update($data);
+
+        return redirect()->route('boards.index')->with('success', 'Board updated successfully.');
+    }
+
 }

@@ -3,7 +3,9 @@
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
+use App\Http\Controllers\CardController;
 use App\Http\Controllers\BoardController;
+use App\Http\Controllers\ColumnController;
 use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
@@ -26,10 +28,11 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/boards', [BoardController::class, 'index'])->name('boards.index');
-    Route::get('/boards/create', [BoardController::class, 'create'])->name('boards.create');
-    Route::post('/boards', [BoardController::class, 'store'])->name('boards.store');
-    Route::delete('/boards/{board}', [BoardController::class, 'destroy'])->name('boards.destroy');
+    Route::resource('boards', BoardController::class);
+    Route::resource('boards.columns', ColumnController::class)->except(['index', 'create', 'show', 'edit']);
+    Route::resource('cards', CardController::class)->except(['index', 'create', 'show', 'edit']);
+
+    Route::post('/cards', [CardController::class, 'store'])->name('cards.store');
 });
 
 require __DIR__.'/auth.php';

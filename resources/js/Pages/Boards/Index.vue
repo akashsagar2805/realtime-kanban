@@ -29,7 +29,13 @@ const boards = props.boards;
                             <h3 class="text-lg font-semibold text-gray-800">{{ board.name }}</h3>
                             <p class="mt-2 text-sm text-gray-500">Created at {{ new Date(board.created_at).toLocaleDateString() }}</p>
                         </div>
-                        <div class="p-4 bg-gray-50 flex justify-end">
+                        <div class="p-4 bg-gray-50 flex justify-end items-center space-x-4">
+                            <Link :href="route('boards.edit', board.id)"
+                                  class="text-sm font-medium text-blue-600 hover:text-blue-500">Edit</Link>
+                            <Link :href="route('boards.destroy', board.id)"
+                                  method="delete"
+                                  as="button"
+                                  class="text-sm font-medium text-red-600 hover:text-red-500">Delete</Link>
                             <Link :href="`/boards/${board.id}`"
                                   class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Open Board</Link>
                         </div>
