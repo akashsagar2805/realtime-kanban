@@ -14,10 +14,10 @@ composer_version: "2"
 web_environment: []
 corepack_enable: false
 web_extra_exposed_ports:
-  - name: node-vite
-    container_port: 5173
-    http_port: 5172
-    https_port: 5173
+    - name: node-vite
+      container_port: 5173
+      http_port: 5172
+      https_port: 5173
 
 # Key features of DDEV's config.yaml:
 
@@ -63,7 +63,7 @@ web_extra_exposed_ports:
 
 # host_xhgui_port: 8142
 # Can be used to change the host binding port of the xhgui
-# application. Rarely used; only when port conflict and
+# application. Rarely used; only when port conflict and 
 # bind_all_ports is used (normally with router disabled)
 
 # xhprof_enabled: false  # Set to true to enable Xhprof and "ddev start" or "ddev restart"
@@ -101,7 +101,7 @@ web_extra_exposed_ports:
 # Alternatively, an explicit Composer version may be specified, for example "2.2.18".
 # To reinstall Composer after the image was built, run "ddev debug rebuild".
 
-# nodejs_version: "22"
+nodejs_version: "20"
 # change from the default system Node.js version to any other version.
 # See https://ddev.readthedocs.io/en/stable/users/configuration/config/#nodejs_version for more information
 # and https://www.npmjs.com/package/n#specifying-nodejs-versions for the full documentation,
