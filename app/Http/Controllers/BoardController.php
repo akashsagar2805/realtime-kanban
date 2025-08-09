@@ -3,8 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Board;
+use App\Models\BoardInvitation;
+use App\Models\User;
+use App\Mail\BoardInvitationMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class BoardController extends Controller
 {
@@ -81,6 +87,84 @@ class BoardController extends Controller
         $board->update($data);
 
         return redirect()->route('boards.index')->with('success', 'Board updated successfully.');
+    }
+
+    public function invite(Request $request, Board $board)
+    {
+        $this->authorize('invite', $board);
+
+        $validated = $request->validate([
+            'email' => ['required', 'email', 'max:255'],
+            'role' => ['required', 'in:admin,editor,viewer'],
+        ]);
+
+        // Check if the user is already a member of the board
+        $existingUser = User::where('email', $validated['email'])->first();
+        if ($existingUser && $board->users->contains($existingUser->id)) {
+            return back()->withErrors(['email' => 'This user is already a member of this board.']);
+        }
+
+        // Check if an invitation already exists for this email and board
+        $existingInvitation = BoardInvitation::where('board_id', $board->id)
+            ->where('email', $validated['email'])
+            ->where('status', 'pending')
+            ->first();
+
+        if ($existingInvitation) {
+            return back()->withErrors(['email' => 'An invitation has already been sent to this email for this board.']);
+        }
+
+        $token = Str::random(60);
+
+        $invitation = BoardInvitation::create([
+            'board_id' => $board->id,
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'token' => $token,
+            'expires_at' => now()->addDays(7),
+        ]);
+
+        Mail::to($validated['email'])->send(new BoardInvitationMail($invitation));
+
+        return back()->with('success', 'Invitation sent successfully.');
+    }
+
+    public function acceptInvitation(Request $request, string $token)
+    {
+        $invitation = BoardInvitation::where('token', $token)
+            ->where('status', 'pending')
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if (!$invitation) {
+            abort(404, 'Invitation not found or expired.');
+        }
+
+        if (!Auth::check()) {
+            session()->put('url.intended', route('invitations.accept', ['token' => $token]));
+            return redirect()->route('login')->with('info', 'Please log in or register to accept the invitation.');
+        }
+
+        $user = Auth::user();
+
+        // Check if the logged-in user's email matches the invited email
+        if ($user->email !== $invitation->email) {
+            return redirect()->route('dashboard')->with('error', 'This invitation is not for your account. Please log in with the correct email or register.');
+        }
+
+        // Check if the user is already a member of the board
+        if ($invitation->board->users->contains($user->id)) {
+            $invitation->update(['status' => 'accepted', 'accepted_at' => now()]);
+            return redirect()->route('boards.show', $invitation->board)->with('info', 'You are already a member of this board.');
+        }
+
+        // Attach the user to the board with the specified role
+        $invitation->board->users()->attach($user->id, ['role' => $invitation->role]);
+
+        // Update invitation status
+        $invitation->update(['status' => 'accepted', 'accepted_at' => now()]);
+
+        return redirect()->route('boards.show', $invitation->board)->with('success', 'Invitation accepted! You are now a member of the board.');
     }
 
 }

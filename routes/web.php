@@ -21,6 +21,8 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/invitations/{token}/accept', [BoardController::class, 'acceptInvitation'])->name('invitations.accept');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -33,6 +35,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('cards', CardController::class)->except(['index', 'create', 'show', 'edit']);
 
     Route::post('/cards', [CardController::class, 'store'])->name('cards.store');
+
+    Route::post('/boards/{board}/invite', [BoardController::class, 'invite'])->name('boards.invite');
 });
 
 require __DIR__.'/auth.php';

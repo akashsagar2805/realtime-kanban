@@ -52,6 +52,17 @@ class BoardPolicy
     }
 
     /**
+     * Determine whether the user can invite users to the board.
+     */
+    public function invite(User $user, Board $board): bool
+    {
+        return $board->users()
+            ->where('user_id', $user->id)
+            ->wherePivot('role', 'admin')
+            ->exists();
+    }
+
+    /**
      * Determine whether the user can restore the model.
      */
     public function restore(User $user, Board $board): bool

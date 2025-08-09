@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
+import path from 'path';
 
 export default defineConfig({
     plugins: [
@@ -17,6 +18,11 @@ export default defineConfig({
             },
         }),
     ],
+    resolve: {
+        alias: {
+            '~': path.resolve(process.cwd(), 'resources/js'),
+        },
+    },
     server: {
         // Respond to all network requests
         host: "0.0.0.0",
