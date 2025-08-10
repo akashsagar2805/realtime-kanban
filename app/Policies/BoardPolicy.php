@@ -58,8 +58,24 @@ class BoardPolicy
     {
         return $board->users()
             ->where('user_id', $user->id)
+            ->wherePivotIn('role', ['admin', 'editor'])
+            ->exists();
+    }
+
+    public function updateRole(User $user, Board $board): bool
+    {
+        return $board->users()
+            ->where('user_id', $user->id)
             ->wherePivot('role', 'admin')
             ->exists();
+    }
+
+    public function removeMember(User $user, Board $board, User $member): bool
+    {
+        return $board->users()
+            ->where('user_id', $user->id)
+            ->wherePivot('role', 'admin')
+            ->exists() && $user->id !== $member->id;
     }
 
     /**

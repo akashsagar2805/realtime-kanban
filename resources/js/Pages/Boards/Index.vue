@@ -30,9 +30,9 @@ const boards = props.boards;
                             <p class="mt-2 text-sm text-gray-500">Created at {{ new Date(board.created_at).toLocaleDateString() }}</p>
                         </div>
                         <div class="p-4 bg-gray-50 flex justify-end items-center space-x-4">
-                            <Link :href="route('boards.edit', board.id)"
+                            <Link v-if="board.pivot.role === 'admin' || board.pivot.role === 'editor'" :href="route('boards.edit', board.id)"
                                   class="text-sm font-medium text-blue-600 hover:text-blue-500">Edit</Link>
-                            <Link :href="route('boards.destroy', board.id)"
+                            <Link v-if="board.pivot.role === 'admin'" :href="route('boards.destroy', board.id)"
                                   method="delete"
                                   as="button"
                                   class="text-sm font-medium text-red-600 hover:text-red-500">Delete</Link>

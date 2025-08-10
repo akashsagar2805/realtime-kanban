@@ -18,6 +18,7 @@ class BoardController extends Controller
     {
         $boards = $request->user()
             ->boards()
+            ->withPivot('role')
             ->latest()
             ->get();
 
@@ -60,10 +61,15 @@ class BoardController extends Controller
     {
         $this->authorize('view', $board);
 
-        $board->load('columns.cards');
+        $board->load('columns.cards', 'users');
+
+        $user = Auth::user();
+        $role = $board->users->find($user->id)->pivot->role;
 
         return Inertia::render('Boards/Show', [
-            'board' => $board
+            'board' => $board,
+            'role' => $role,
+            'members' => $board->users,
         ]);
     }
 
@@ -167,4 +173,32 @@ class BoardController extends Controller
         return redirect()->route('boards.show', $invitation->board)->with('success', 'Invitation accepted! You are now a member of the board.');
     }
 
+    public function updateMemberRole(Request $request, Board $board, User $user)
+    {
+        $this->authorize('updateRole', $board);
+
+        $validated = $request->validate([
+            'role' => ['required', 'in:admin,editor,viewer'],
+        ]);
+
+        $board->users()->updateExistingPivot($user->id, [
+            'role' => $validated['role'],
+        ]);
+
+        return back()->with('success', 'User role updated successfully.');
+    }
+
+    public function removeMember(Request $request, Board $board, User $user)
+    {
+        $this->authorize('removeMember', [$board, $user]);
+
+        // You can't remove the board creator
+        if ($user->id === $board->created_by) {
+            return back()->withErrors(['error' => 'You cannot remove the board creator.']);
+        }
+
+        $board->users()->detach($user->id);
+
+        return back()->with('success', 'User removed from the board successfully.');
+    }
 }

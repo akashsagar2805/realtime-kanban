@@ -4,7 +4,8 @@ import { ref } from 'vue';
 import { useForm, Link } from '@inertiajs/vue3';
 
 const props = defineProps({
-    column: Object
+    column: Object,
+    role: String
 });
 
 const showNewCardForm = ref(false);
@@ -58,7 +59,7 @@ const deleteColumn = () => {
                     class="w-full p-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
             </form>
-            <div class="flex space-x-2 ml-2">
+            <div v-if="role !== 'viewer'" class="flex space-x-2 ml-2">
                 <button v-if="!showEditColumnForm" @click="showEditColumnForm = true" class="text-gray-500 hover:text-gray-700">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.38-2.828-2.828z" />
@@ -78,10 +79,10 @@ const deleteColumn = () => {
         </div>
         <div class="p-4">
             <div class="space-y-4 overflow-y-auto max-h-96 scrollbar-hide">
-                <Card v-for="card in column.cards" :key="card.id" :card="card" />
+                <Card v-for="card in column.cards" :key="card.id" :card="card" :role="role" />
             </div>
         </div>
-        <div class="p-4">
+        <div v-if="role !== 'viewer'" class="p-4">
             <form v-if="showNewCardForm" @submit.prevent="addCard">
                 <input
                     type="text"

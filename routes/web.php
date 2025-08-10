@@ -37,6 +37,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/cards', [CardController::class, 'store'])->name('cards.store');
 
     Route::post('/boards/{board}/invite', [BoardController::class, 'invite'])->name('boards.invite');
+    Route::put('/boards/{board}/members/{user}', [BoardController::class, 'updateMemberRole'])->name('boards.members.update');
+    Route::delete('/boards/{board}/members/{user}', [BoardController::class, 'removeMember'])->name('boards.members.destroy');
 });
 
 require __DIR__.'/auth.php';

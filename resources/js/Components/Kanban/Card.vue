@@ -3,7 +3,8 @@ import { ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
-    card: Object
+    card: Object,
+    role: String
 });
 
 const showEditCardForm = ref(false);
@@ -41,7 +42,7 @@ const deleteCard = () => {
                 </span>
                 <img v-if="card.assignee" class="h-6 w-6 rounded-full object-cover" :src="card.assignee.avatar" :alt="card.assignee.name">
             </div>
-            <div class="flex justify-end space-x-2 mt-2">
+            <div v-if="role !== 'viewer'" class="flex justify-end space-x-2 mt-2">
                 <button @click="showEditCardForm = true" class="text-gray-500 hover:text-gray-700 text-sm">Edit</button>
                 <button @click="deleteCard" class="text-red-500 hover:text-red-700 text-sm">Delete</button>
             </div>
