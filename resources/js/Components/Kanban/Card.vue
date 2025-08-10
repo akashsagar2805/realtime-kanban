@@ -32,7 +32,7 @@ const deleteCard = () => {
 </script>
 
 <template>
-    <div class="bg-white mt-4 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer">
+    <div class="bg-white mt-4 p-4 rounded-lg shadow-sm cursor-grab card-handle hover:shadow-md transition-shadow duration-200 cursor-pointer">
         <div v-if="!showEditCardForm">
             <h3 class="font-semibold text-gray-800 text-sm">{{ card.title }}</h3>
             <p v-if="card.description" class="text-xs text-gray-500 mt-1">{{ card.description }}</p>

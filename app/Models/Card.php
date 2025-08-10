@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Card extends Model
 {
-    protected $fillable = ['title', 'user_id', 'column_id'];
+    protected $fillable = ['title', 'user_id', 'column_id', 'order'];
     public function column()
     {
         return $this->belongsTo(Column::class);

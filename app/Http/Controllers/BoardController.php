@@ -61,7 +61,15 @@ class BoardController extends Controller
     {
         $this->authorize('view', $board);
 
-        $board->load('columns.cards', 'users');
+        $board->load([
+            'columns' => function ($query) {
+                $query->orderBy('order');
+            },
+            'columns.cards' => function ($query) {
+                $query->orderBy('order');
+            },
+            'users'
+        ]);
 
         $user = Auth::user();
         $role = $board->users->find($user->id)->pivot->role;

@@ -3,10 +3,40 @@
 @tailwind utilities;
 
 .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
 }
 
 .scrollbar-hide::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari, Opera*/
+    display: none;
+    /* Chrome, Safari, Opera*/
+}
+
+/* Ghost element while dragging */
+.ghost-column {
+    opacity: 0.4;
+}
+
+/* The element being dragged */
+.dragging-column {
+    background-color: #f9fafb;
+    /* Tailwind gray-50 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 0.5rem;
+    /* match your Column rounded style */
+}
+
+/* Smooth transition for other columns moving */
+.transition-column {
+    transition: transform 0.25s ease;
+}
+
+.handle {
+    cursor: grab;
+}
+
+.handle:active {
+    cursor: grabbing;
 }

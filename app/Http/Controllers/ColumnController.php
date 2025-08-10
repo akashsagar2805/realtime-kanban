@@ -14,8 +14,10 @@ class ColumnController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
+        $maxOrder = Column::where('board_id', $board->id)->max('order');
         $board->columns()->create([
             'name' => $request->name,
+            'order' => $maxOrder + 1
         ]);
 
         return redirect()->back()->with('success', 'Column created successfully.');
@@ -39,5 +41,23 @@ class ColumnController extends Controller
         $column->delete();
 
         return redirect()->back()->with('success', 'Column deleted successfully.');
+    }
+
+    public function reorder(Request $request, Board $board)
+    {
+        $this->authorize('update', $board);
+
+        $validated = $request->validate([
+            'order'   => 'required|array',
+            'order.*' => 'integer|exists:columns,id',
+        ]);
+
+        foreach ($validated['order'] as $index => $columnId) {
+            Column::where('id', $columnId)
+                ->where('board_id', $board->id)
+                ->update(['order' => $index + 1]);
+        }
+        // return something clean for Inertia
+        return redirect()->back()->with('success', 'Column updated successfully.');
     }
 }

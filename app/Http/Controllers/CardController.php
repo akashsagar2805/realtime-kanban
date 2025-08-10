@@ -17,10 +17,11 @@ class CardController extends Controller
         ]);
 
         $column = Column::findOrFail($request->column_id);
-
-        $card = $column->cards()->create([
+        $maxOrder = Card::where('column_id', $column->id)->max('order');
+        $column->cards()->create([
             'title' => $request->title,
             'user_id' => Auth::id(),
+            'order' => $maxOrder + 1,
         ]);
 
         return redirect()->back()->with(['success' => 'Card created successfully!']);
@@ -44,5 +45,25 @@ class CardController extends Controller
         $card->delete();
 
         return redirect()->back()->with(['success' => 'Card deleted successfully!']);
+    }
+
+    public function reorder(Request $request)
+    {
+        $request->validate([
+            'cards' => 'required|array',
+            'cards.*.id' => 'required|exists:cards,id',
+            'cards.*.order' => 'required|integer',
+            'cards.*.column_id' => 'required|exists:columns,id',
+        ]);
+
+        foreach ($request->cards as $cardData) {
+            Card::where('id', $cardData['id'])
+                ->update([
+                    'order' => $cardData['order'],
+                    'column_id' => $cardData['column_id'],
+                ]);
+        }
+
+        return back();
     }
 }
