@@ -2,6 +2,9 @@ import '../css/app.css';
 import './bootstrap';
 import './echo';
 
+import Swal from 'sweetalert2';
+window.Swal = Swal;
+
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';

@@ -15,10 +15,12 @@ class ColumnController extends Controller
         ]);
 
         $maxOrder = Column::where('board_id', $board->id)->max('order');
-        $board->columns()->create([
+        $column = $board->columns()->create([
             'name' => $request->name,
             'order' => $maxOrder + 1
         ]);
+
+        broadcast(new \App\Events\ColumnCreated($column))->toOthers();
 
         return redirect()->back()->with('success', 'Column created successfully.');
     }
@@ -33,11 +35,15 @@ class ColumnController extends Controller
             'name' => $request->name,
         ]);
 
+        broadcast(new \App\Events\ColumnUpdated($column))->toOthers();
+
         return redirect()->back()->with('success', 'Column updated successfully.');
     }
 
     public function destroy(Board $board, Column $column)
     {
+        broadcast(new \App\Events\ColumnDeleted($column))->toOthers();
+
         $column->delete();
 
         return redirect()->back()->with('success', 'Column deleted successfully.');
@@ -57,6 +63,8 @@ class ColumnController extends Controller
                 ->where('board_id', $board->id)
                 ->update(['order' => $index + 1]);
         }
+
+        broadcast(new \App\Events\ColumnReordered($validated['order'], $board->id))->toOthers();
         // return something clean for Inertia
         return redirect()->back()->with('success', 'Column updated successfully.');
     }

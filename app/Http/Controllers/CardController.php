@@ -18,11 +18,13 @@ class CardController extends Controller
 
         $column = Column::findOrFail($request->column_id);
         $maxOrder = Card::where('column_id', $column->id)->max('order');
-        $column->cards()->create([
+        $card = $column->cards()->create([
             'title' => $request->title,
             'user_id' => Auth::id(),
             'order' => $maxOrder + 1,
         ]);
+
+        broadcast(new \App\Events\CardCreated($card->load('user')))->toOthers();
 
         return redirect()->back()->with(['success' => 'Card created successfully!']);
     }
@@ -37,11 +39,15 @@ class CardController extends Controller
             'title' => $request->title,
         ]);
 
+        broadcast(new \App\Events\CardUpdated($card->load('user')))->toOthers();
+
         return redirect()->back()->with(['success' => 'Card updated successfully!']);
     }
 
     public function destroy(Card $card)
     {
+        broadcast(new \App\Events\CardDeleted($card))->toOthers();
+
         $card->delete();
 
         return redirect()->back()->with(['success' => 'Card deleted successfully!']);
@@ -63,6 +69,9 @@ class CardController extends Controller
                     'column_id' => $cardData['column_id'],
                 ]);
         }
+
+        $boardId = Column::find($request->cards[0]['column_id'])->board_id;
+        broadcast(new \App\Events\CardReordered($request->cards, $boardId))->toOthers();
 
         return back();
     }

@@ -3,7 +3,7 @@ import AuthenticatedLayout from '~/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
 import Column from '~/Components/Kanban/Column.vue';
 import MembersModal from '~/Components/MembersModal.vue';
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import draggable from 'vuedraggable';
 
 const props = defineProps({
@@ -51,6 +51,80 @@ const addColumn = () => {
         },
     });
 };
+
+const showToast = (icon, title) => {
+    window.Swal.fire({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        icon: icon,
+        title: title,
+        didOpen: (toast) => {
+            toast.onmouseenter = window.Swal.stopTimer;
+            toast.onmouseleave = window.Swal.resumeTimer;
+        }
+    });
+};
+
+onMounted(() => {
+    window.Echo.private(`board.${props.board.id}`)
+        .listen('.card.created', (e) => {
+            const column = columns.value.find(col => col.id === e.card.column_id);
+            if (column) {
+                column.cards.push(e.card);
+                showToast('success', `Card "${e.card.title}" created by ${e.card.user.name}`);
+            }
+        })
+        .listen('.card.updated', (e) => {
+            const column = columns.value.find(col => col.id === e.card.column_id);
+            if (column) {
+                const index = column.cards.findIndex(card => card.id === e.card.id);
+                if (index !== -1) {
+                    column.cards.splice(index, 1, e.card);
+                    showToast('info', `Card "${e.card.title}" updated`);
+                }
+            }
+        })
+        .listen('.card.deleted', (e) => {
+            const column = columns.value.find(col => col.id === e.card.column_id);
+            if (column) {
+                column.cards = column.cards.filter(card => card.id !== e.card.id);
+                showToast('warning', `Card "${e.card.title}" deleted`);
+            }
+        })
+        .listen('.card.reordered', (e) => {
+            router.reload({ preserveScroll: true });
+            showToast('info', `Cards reordered`);
+        })
+        .listen('.column.created', (e) => {
+            columns.value.push(e.column);
+            showToast('success', `Column "${e.column.name}" created`);
+        })
+        .listen('.column.updated', (e) => {
+            const index = columns.value.findIndex(col => col.id === e.column.id);
+            if (index !== -1) {
+                columns.value.splice(index, 1, e.column);
+                showToast('info', `Column "${e.column.name}" updated`);
+            }
+        })
+        .listen('.column.deleted', (e) => {
+            columns.value = columns.value.filter(col => col.id !== e.column.id);
+            showToast('warning', `Column "${e.column.name}" deleted`);
+        })
+        .listen('.column.reordered', (e) => {
+            const newColumns = e.columns.map(columnId => {
+                return columns.value.find(col => col.id === columnId);
+            }).filter(Boolean);
+            columns.value = newColumns;
+            showToast('info', `Columns reordered`);
+        });
+});
+
+onUnmounted(() => {
+    window.Echo.leave(`board.${props.board.id}`);
+});
 </script>
 
 <template>

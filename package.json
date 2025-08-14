@@ -24,6 +24,7 @@
     },
     "dependencies": {
         "@heroicons/vue": "^2.2.0",
+        "sweetalert2": "^11.22.3",
         "vuedraggable": "^4.1.0"
     }
 }
