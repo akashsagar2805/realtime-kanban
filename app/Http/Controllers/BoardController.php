@@ -100,6 +100,8 @@ class BoardController extends Controller
 
         $board->update($data);
 
+        broadcast(new \App\Events\BoardUpdated($board))->toOthers();
+
         return redirect()->route('boards.index')->with('success', 'Board updated successfully.');
     }
 

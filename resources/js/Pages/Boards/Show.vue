@@ -119,6 +119,11 @@ onMounted(() => {
             }).filter(Boolean);
             columns.value = newColumns;
             showToast('info', `Columns reordered`);
+        })
+        .listen('.board.updated', (e) => {
+            // Update the board name in the header
+            props.board.name = e.board.name;
+            showToast('info', `Board name updated to "${e.board.name}"`);
         });
 });
 
