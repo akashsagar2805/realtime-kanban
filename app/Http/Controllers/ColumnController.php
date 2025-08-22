@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 class ColumnController extends Controller
 {
+    # Store a new column
     public function store(Request $request, Board $board)
     {
         $request->validate([
